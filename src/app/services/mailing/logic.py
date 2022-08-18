@@ -1,7 +1,7 @@
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from src.app.services.mailing.models import MailingModel
-from src.app.services.mailing.schemes import Mailing, MailingCreate
+from src.app.services.mailing.schemes import MailingCreate
 from src.core.base_crud import CRUDBase
 
 

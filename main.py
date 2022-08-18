@@ -2,12 +2,12 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
 from src.core.config import settings
-from src.app.routers.user import router as user_router
+from src.app.routers.subscriber import router as subscriber_router
 
 
 def get_application():
     _app = FastAPI(title=settings.PROJECT_NAME)
-    _app.include_router(user_router)
+    _app.include_router(subscriber_router)
 
     _app.add_middleware(
         CORSMiddleware,

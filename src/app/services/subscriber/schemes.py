@@ -2,27 +2,27 @@
 from pydantic import BaseModel
 
 
-class UserBase(BaseModel):
+class SubscriberBase(BaseModel):
     phone: str
     provider_code: str
     tag: str
     time_zone: str
 
 
-class UserCreate(UserBase):
+class SubscriberCreate(SubscriberBase):
     id: int = None
 
 
-class UserUpdate(UserBase):
+class SubscriberUpdate(SubscriberBase):
     phone: str = None
     provider_code: str = None
     tag: str = None
     time_zone: str = None
 
 
-class User(UserBase):
+class Subscriber(SubscriberBase):
     id: int
 
 
-class UserDeletedResponse(BaseModel):
+class SubscriberDeletedResponse(BaseModel):
     id: int

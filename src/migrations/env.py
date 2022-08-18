@@ -7,7 +7,7 @@ from sqlalchemy import pool
 from alembic import context
 
 from src.core.database import Base
-from src.app.services.user.models import UserModel
+from src.app.services.subscriber.models import SubscriberModel
 from src.app.services.mailing.models import MailingModel
 from src.app.services.message.models import MessageModel
 

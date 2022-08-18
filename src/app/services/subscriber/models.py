@@ -1,13 +1,14 @@
+from sqlalchemy import Column, Integer, String
 from sqlalchemy.orm import relationship
 
-from src.app.services.user.schemes import User
+from src.app.services.subscriber.schemes import Subscriber
 from src.core.database import Base
+from src.app.services.message.models import MessageModel
 
-from sqlalchemy import Column, Integer, String
 
 
-class UserModel(Base):
-    __tablename__ = "users"
+class SubscriberModel(Base):
+    __tablename__ = "subscribers"
     id = Column(Integer, primary_key=True)
     phone = Column(String(11), unique=True)
     provider_code = Column(String)
@@ -16,4 +17,4 @@ class UserModel(Base):
     messages = relationship("MessageModel")
 
     def to_pd(self):
-        return User(**self.__dict__)
+        return Subscriber(**self.__dict__)

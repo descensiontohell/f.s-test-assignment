@@ -17,4 +17,4 @@ class MessageModel(Base):
     sent_at = Column(DateTime, server_default=func.now())
     status = Column(Enum(MessageStatus))
     mailing_id = Column(Integer, ForeignKey("mailings.id"))
-    user_id = Column(Integer, ForeignKey("users.id"))
+    subscriber_id = Column(Integer, ForeignKey("subscribers.id"))
