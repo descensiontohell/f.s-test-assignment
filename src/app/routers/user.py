@@ -8,11 +8,15 @@ from src.core.database import get_db
 router = APIRouter(
     prefix="/users",
     tags=["users"],
-    responses={200: {"description": "sus"}}
 )
 
 
-@router.post("/", response_model=User)
+@router.post(
+    path="/",
+    response_model=User,
+    description="Creates new user",
+    responses={409: {"description": "User exists"}},
+)
 async def create_user(user: UserCreate, db: Session = Depends(get_db)):
     model = await user_service.get_by_phone(db, user.phone)
     if model:
@@ -21,7 +25,12 @@ async def create_user(user: UserCreate, db: Session = Depends(get_db)):
     return (await user_service.get_by_phone(db, user.phone)).to_pd()
 
 
-@router.put("/{user_id}", response_model=User)
+@router.put(
+    path="/{user_id}",
+    response_model=User,
+    description="Updates existing user",
+    responses={404: {"description": "User not found"}},
+)
 async def update_user(user_id: int, user: UserUpdate, db: Session = Depends(get_db)):
     model = await user_service.get(session=db, id=user_id)
     if not model:
@@ -30,7 +39,12 @@ async def update_user(user_id: int, user: UserUpdate, db: Session = Depends(get_
     return (await user_service.get(session=db, id=user_id)).to_pd()
 
 
-@router.delete("/{user_id}", response_model=UserDeletedResponse)
+@router.delete(
+    path="/{user_id}",
+    response_model=UserDeletedResponse,
+    description="Deletes existing user",
+    responses={404: {"description": "User not found"}},
+)
 async def delete_user(user_id: int, db: Session = Depends(get_db)):
     model = await user_service.get(session=db, id=user_id)
     if not model:
