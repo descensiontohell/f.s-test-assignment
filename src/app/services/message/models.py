@@ -9,6 +9,7 @@ from src.core.database import Base
 class MessageStatus(enum.Enum):
     delivered = "delivered"
     failed = "failed"
+    pending = "pending"
 
 
 class MessageModel(Base):

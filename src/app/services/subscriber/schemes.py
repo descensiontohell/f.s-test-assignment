@@ -3,7 +3,7 @@ from pydantic import BaseModel
 
 
 class SubscriberBase(BaseModel):
-    phone: str
+    phone: int
     provider_code: str
     tag: str
     time_zone: str
@@ -14,7 +14,7 @@ class SubscriberCreate(SubscriberBase):
 
 
 class SubscriberUpdate(SubscriberBase):
-    phone: str = None
+    phone: int = None
     provider_code: str = None
     tag: str = None
     time_zone: str = None

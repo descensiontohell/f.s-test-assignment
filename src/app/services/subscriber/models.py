@@ -6,11 +6,10 @@ from src.core.database import Base
 from src.app.services.message.models import MessageModel
 
 
-
 class SubscriberModel(Base):
     __tablename__ = "subscribers"
     id = Column(Integer, primary_key=True)
-    phone = Column(String(11), unique=True)
+    phone = Column(Integer, unique=True)
     provider_code = Column(String)
     tag = Column(String)
     time_zone = Column(String)

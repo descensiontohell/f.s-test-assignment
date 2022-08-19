@@ -1,4 +1,5 @@
 from fastapi import APIRouter, Depends, HTTPException
+from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import Session
 
 from src.app.services.subscriber.logic import subscriber_service
@@ -17,7 +18,7 @@ router = APIRouter(
     description="Creates new subscriber",
     responses={409: {"description": "Subscriber exists"}},
 )
-async def create_subscriber(subscriber: SubscriberCreate, db: Session = Depends(get_db)):
+async def create_subscriber(subscriber: SubscriberCreate, db: AsyncSession = Depends(get_db)):
     model = await subscriber_service.get_by_phone(db, subscriber.phone)
     if model:
         raise HTTPException(status_code=409, detail="Subscriber with given phone exists")
@@ -31,7 +32,7 @@ async def create_subscriber(subscriber: SubscriberCreate, db: Session = Depends(
     description="Updates existing subscriber",
     responses={404: {"description": "Subscriber not found"}},
 )
-async def update_user(user_id: int, user: SubscriberUpdate, db: Session = Depends(get_db)):
+async def update_user(user_id: int, user: SubscriberUpdate, db: AsyncSession = Depends(get_db)):
     model = await subscriber_service.get(session=db, id=user_id)
     if not model:
         raise HTTPException(status_code=404, detail="Subscriber not found")
@@ -45,7 +46,7 @@ async def update_user(user_id: int, user: SubscriberUpdate, db: Session = Depend
     description="Deletes existing subscriber",
     responses={404: {"description": "Subscriber not found"}},
 )
-async def delete_user(user_id: int, db: Session = Depends(get_db)):
+async def delete_user(user_id: int, db: AsyncSession = Depends(get_db)):
     model = await subscriber_service.get(session=db, id=user_id)
     if not model:
         raise HTTPException(status_code=404, detail="Subscriber not found")

@@ -1,3 +1,4 @@
+import logging
 from typing import Union, Generic, Type, Optional, TypeVar, List
 
 from pydantic import BaseModel
@@ -14,6 +15,7 @@ UpdateSchemaType = TypeVar("UpdateSchemaType", bound=BaseModel)
 class CRUDBase(Generic[ModelType, CreateSchemaType, UpdateSchemaType]):
     def __init__(self, model: Type[ModelType]):
         self.model = model
+        self.logger = logging.getLogger(__name__)
 
     async def get(self, session: AsyncSession, *, id: int) -> Optional[ModelType]:
         stmt = select(self.model).where(
@@ -34,6 +36,7 @@ class CRUDBase(Generic[ModelType, CreateSchemaType, UpdateSchemaType]):
         db_obj = self.model(**obj_in_data)
         session.add(db_obj)
         await session.commit()
+        await session.refresh(db_obj)
         return db_obj
 
     async def update(self, session: AsyncSession, *, db_obj: ModelType, obj_in: UpdateSchemaType) -> ModelType:
