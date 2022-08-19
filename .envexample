@@ -1,0 +1,10 @@
+PROJECT_NAME=foo
+BACKEND_CORS_ORIGINS=["http://localhost:8000", "https://localhost:8000", "http://localhost", "https://localhost"]
+AUTH_TOKEN=bar
+URL_BASE=https://probe.fbrq.cloud/v1/send
+
+
+POSTGRES_USER=postgres
+POSTGRES_PASSWORD=postgres
+POSTGRES_SERVER=database
+POSTGRES_DB=app

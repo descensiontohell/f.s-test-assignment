@@ -1,4 +1,4 @@
-from sqlalchemy import Column, Integer, String
+from sqlalchemy import Column, Integer, String, BigInteger
 from sqlalchemy.orm import relationship
 
 from src.app.services.subscriber.schemes import Subscriber
@@ -9,7 +9,7 @@ from src.app.services.message.models import MessageModel
 class SubscriberModel(Base):
     __tablename__ = "subscribers"
     id = Column(Integer, primary_key=True)
-    phone = Column(Integer, unique=True)
+    phone = Column(BigInteger, unique=True)
     provider_code = Column(String)
     tag = Column(String)
     time_zone = Column(String)

@@ -1,5 +1,5 @@
 import logging
-from typing import Union, Generic, Type, Optional, TypeVar, List
+from typing import Generic, Type, Optional, TypeVar, List
 
 from pydantic import BaseModel
 from sqlalchemy import select, delete
@@ -25,8 +25,8 @@ class CRUDBase(Generic[ModelType, CreateSchemaType, UpdateSchemaType]):
         db_obj = coro.scalar()
         return db_obj
 
-    async def get_many(self, session: AsyncSession, *, offset: int = 0, limit: int = 100) -> List[ModelType]:
-        stmt = select(self.model).offset(offset).limit(limit)
+    async def get_many(self, session: AsyncSession) -> List[ModelType]:
+        stmt = select(self.model)
         coro = await session.execute(stmt)
         db_obj_list = coro.scalars()
         return db_obj_list

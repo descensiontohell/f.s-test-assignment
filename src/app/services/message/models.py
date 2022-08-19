@@ -1,6 +1,6 @@
 import enum
 
-from sqlalchemy import Column, Integer, String, DateTime, Enum, ForeignKey
+from sqlalchemy import Column, Integer, DateTime, Enum, ForeignKey
 from sqlalchemy.sql import func
 
 from src.core.database import Base
@@ -19,3 +19,7 @@ class MessageModel(Base):
     status = Column(Enum(MessageStatus))
     mailing_id = Column(Integer, ForeignKey("mailings.id"))
     subscriber_id = Column(Integer, ForeignKey("subscribers.id"))
+
+    def to_pd(self):
+        from src.app.services.message.schemes import MessageFull
+        return MessageFull(**self.__dict__)

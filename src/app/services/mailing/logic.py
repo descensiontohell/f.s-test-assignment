@@ -1,16 +1,16 @@
 import asyncio
 import datetime
-from select import select
 from typing import List
 from collections import deque
 
+from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy.orm import selectinload
 
 from src.app.services.mailing.mailer import Mailer
 from src.app.services.mailing.models import MailingModel
-from src.app.services.mailing.schemes import MailingCreate, Mailing
+from src.app.services.mailing.schemes import MailingCreate, Mailing, MailingStats
 from src.app.services.subscriber.logic import subscriber_service
-from src.app.services.subscriber.schemes import Subscriber
 from src.core.base_crud import CRUDBase
 
 
@@ -26,6 +26,7 @@ class MailingService(CRUDBase):
         :param obj_in: MailingCreate
         :return: MailingModel
         """
+
         model = await self.save(session=session, obj_in=obj_in)
         return model
 
@@ -38,7 +39,7 @@ class MailingService(CRUDBase):
         :return: None
         """
 
-        self.logger.info("CREATED TASK")
+        self.logger.warning("CREATED TASK")
         asyncio.create_task(self.poll(db=session, mailing=mailing))
 
     async def poll(self, db: AsyncSession, mailing: Mailing) -> None:
@@ -51,13 +52,13 @@ class MailingService(CRUDBase):
         """
 
         while True:
-            self.logger.error(f"Polling for mailing id={mailing.id}")
+            self.logger.warning(f"Polling for mailing id={mailing.id}")
             await asyncio.sleep(3)
             now = datetime.datetime.now()
             if now > mailing.end_time:
                 return
             if now > mailing.start_time:
-                self.logger.error(f"Initializing mailing {mailing.id}")
+                self.logger.warning(f"Initializing mailing {mailing.id}")
                 return await self.initialize_mailing_if_not_canceled(session=db, m=mailing)
 
     async def initialize_mailing_if_not_canceled(self, session: AsyncSession, m: Mailing) -> None:
@@ -76,9 +77,52 @@ class MailingService(CRUDBase):
 
         subscribers = await subscriber_service.get_mailing_subscribers(session=session, mailing=mailing)
         subs_queue = deque(subscribers)
-        self.logger.error(f"OBTAINED SUBSCRIBERS: {subs_queue}")
+        self.logger.warning(f"OBTAINED SUBSCRIBERS: {subs_queue}")
 
         Mailer(mailing=mailing, subs=subs_queue, db=session)
+
+    async def get_mailing_stats(self, session: AsyncSession) -> List[MailingStats]:
+        """
+        Returns a list of mailings and message stats
+
+        :param session: AsyncSession
+        :return: List[MailingStats]
+        """
+
+        stmt = select(self.model).options(selectinload(self.model.messages))
+        coro = await session.execute(stmt)
+        db_obj_list = coro.scalars()
+        return [o.to_stats() for o in db_obj_list if o]
+
+    async def get_mailing(self, id: int, session: AsyncSession) -> MailingModel:
+        """
+        Returns MailingModel by id
+
+        :param id: int
+        :param session: AsyncSession
+        :return: MailingModel
+        """
+
+        stmt = select(self.model).options(selectinload(self.model.messages)).where(self.model.id == id)
+        coro = await session.execute(stmt)
+        obj = coro.scalar()
+        return obj
+
+    async def is_running(self, id: int, session: AsyncSession) -> bool:
+        """
+        Checks if datetime.now() is between mailing start time and end time
+
+        :param id: int
+        :param session: AsyncSession
+        :return: bool
+        """
+
+        model = await self.get(session=session, id=id)
+        now = datetime.datetime.now()
+        if model.start_time < now < model.end_time:
+            return True
+        else:
+            return False
 
 
 mailing_service = MailingService()

@@ -1,8 +1,9 @@
 import datetime
+from typing import List
 
 from pydantic import BaseModel
 
-from src.app.services.message.schemes import Message
+from src.app.services.message.schemes import MessageFull
 
 
 class MailingBase(BaseModel):
@@ -27,7 +28,22 @@ class MailingUpdate(MailingBase):
     end_time: datetime.datetime = None
 
 
+class MailingUpdatedResponse(BaseModel):
+    id: int
+
+
+class Stats(BaseModel):
+    failed: int
+    delivered: int
+
+
 class MailingStats(Mailing):
-    messages: Message
-    delivered_messages: int
-    failed_messages: int
+    messages: Stats
+
+
+class MailingMessages(Mailing):
+    messages: List[MessageFull]
+
+
+class MailingDeletedResponse(BaseModel):
+    id: int

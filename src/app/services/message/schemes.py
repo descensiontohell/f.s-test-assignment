@@ -14,3 +14,7 @@ class Message(BaseModel):
 class MessageCreate(Message):
     mailing_id: int
     subscriber_id: int
+
+
+class MessageFull(MessageCreate):
+    ...

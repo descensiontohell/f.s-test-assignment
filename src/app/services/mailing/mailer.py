@@ -2,7 +2,6 @@ import asyncio
 import datetime
 import logging
 from collections import deque
-from typing import List
 
 import aiohttp
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -25,6 +24,12 @@ class Mailer:
         asyncio.create_task(self.mail())
 
     async def mail(self):
+        """
+        Pops queue and sends messages until queue is empty or datetime.now() > mailing.end_time
+
+        :return: None
+        """
+
         while datetime.datetime.now() < self.mailing.end_time and self.subs_q:
             try:
                 subscriber = self.subs_q.pop()
@@ -35,6 +40,14 @@ class Mailer:
             await asyncio.sleep(0.5)
 
     async def send_message(self, subscriber: Subscriber, message_id: int):
+        """
+        Send message then add it to the database with the corresponding status
+
+        :param subscriber: Subscriber
+        :param message_id: int
+        :return: None
+        """
+
         data = {
             "id": message_id,
             "phone": subscriber.phone,
@@ -46,7 +59,7 @@ class Mailer:
                 url=url,
                 json=data,
             )
-            self.logger.error(f"{url}   {resp.status}   {data}")
+            self.logger.warning(f"{url}   {resp.status}   {data}")
 
             if resp.status != 200:
                 self.subs_q.appendleft(subscriber)
@@ -54,7 +67,7 @@ class Mailer:
             else:
                 status = MessageStatus.delivered
 
-        self.logger.error(message_id)
+        self.logger.warning(message_id)
         new_message = MessageCreate(
             id=message_id,
             sent_at=datetime.datetime.now(),
@@ -62,7 +75,7 @@ class Mailer:
             subscriber_id=subscriber.id,
             mailing_id=self.mailing.id,
         )
-        self.logger.error(new_message)
+        self.logger.warning(new_message)
         await message_service.update_message(message_id=message_id, obj=new_message, db=self.db)
 
     async def get_message_id(self, subscriber: Subscriber) -> int:
@@ -72,14 +85,15 @@ class Mailer:
         :param subscriber: Subscriber
         :return: int
         """
+
         message = await message_service.get_by_subscriber_mailing(
             subscriber_id=subscriber.id,
             mailing_id=self.mailing.id,
             db=self.db,
         )
-        self.logger.error(f"MESSAGE: {message}")
+        self.logger.warning(f"MESSAGE: {message}")
         if not message:
-            self.logger.error(f"CREATING MESSAGE")
+            self.logger.warning("CREATING MESSAGE")
             message = await message_service.add_pending_message(
                 MessageCreate(
                     status=MessageStatus.pending,
